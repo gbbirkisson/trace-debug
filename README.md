@@ -74,5 +74,5 @@ Exiting
 
 - [x] stdout
 - [x] jaeger
-- [ ] otlp
+- [x] otlp
 - [ ] zipkin

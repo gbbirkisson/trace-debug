@@ -1,19 +1,19 @@
+use opentelemetry::sdk::trace::TracerProvider;
 use opentelemetry::{
     global,
-    sdk::{
-        trace::{Config, TracerProvider},
-        Resource,
-    },
+    sdk::{trace::Config, Resource},
     trace::{get_active_span, Tracer},
     KeyValue,
 };
 
 use clap::Parser;
+use opentelemetry_otlp::WithExportConfig;
 
 #[derive(clap::ValueEnum, Clone, Debug)]
 enum Exporter {
     Stdout,
     Jaeger,
+    Otlp,
 }
 
 #[derive(Parser, Debug)]
@@ -23,6 +23,11 @@ struct Args {
     #[clap(short, long)]
     #[clap(value_enum, default_value_t=Exporter::Stdout)]
     exporter: Exporter,
+
+    /// Scheme to use
+    #[clap(long)]
+    #[clap(default_value = "http")]
+    scheme: String,
 
     /// Host to export to
     #[clap(long)]
@@ -54,7 +59,8 @@ struct Args {
     number: usize,
 }
 
-fn main() {
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
     let mut args = Args::parse();
 
     println!("Starting trace-debug");
@@ -62,32 +68,53 @@ fn main() {
     // Set default ports based on exporter
     args.port = match (args.port, &args.exporter) {
         (None, Exporter::Jaeger) => Some(6831),
+        (None, Exporter::Otlp) => Some(4317),
         other => other.0,
     };
 
     println!("Using {:#?}", args);
+    let config = Config::default().with_resource(Resource::new(vec![KeyValue {
+        key: "service.name".into(),
+        value: args.service_name.clone().into(),
+    }]));
 
-    let provider = match args.exporter {
-        Exporter::Stdout => TracerProvider::builder()
-            .with_simple_exporter(opentelemetry_stdout::SpanExporter::default())
-            .with_config(
-                Config::default().with_resource(Resource::new(vec![KeyValue {
-                    key: "service.name".into(),
-                    value: args.service_name.into(),
-                }])),
-            )
-            .build(),
-        Exporter::Jaeger => opentelemetry_jaeger::new_agent_pipeline()
-            .with_service_name(args.service_name)
-            .with_endpoint((
-                args.host,
-                args.port.expect("default port not set for exporter"),
-            ))
-            .build_simple()
-            .expect("failed to create jager exporter"),
+    match args.exporter {
+        Exporter::Stdout => {
+            let provider = TracerProvider::builder()
+                .with_simple_exporter(opentelemetry_stdout::SpanExporter::default())
+                .with_config(config)
+                .build();
+            global::set_tracer_provider(provider);
+        }
+        Exporter::Jaeger => {
+            let provider = opentelemetry_jaeger::new_agent_pipeline()
+                .with_service_name(args.service_name)
+                .with_endpoint((
+                    args.host,
+                    args.port.expect("default port not set for exporter"),
+                ))
+                .build_simple()
+                .expect("failed to create jager exporter");
+            global::set_tracer_provider(provider);
+        }
+        Exporter::Otlp => {
+            opentelemetry_otlp::new_pipeline()
+                .tracing()
+                .with_trace_config(config)
+                .with_exporter(
+                    opentelemetry_otlp::new_exporter()
+                        .tonic()
+                        .with_endpoint(format!(
+                            "{}://{}:{}",
+                            args.scheme,
+                            args.host,
+                            args.port.expect("default port not set for exporter")
+                        )),
+                )
+                .install_simple()
+                .expect("failed to create otlp tracer");
+        }
     };
-
-    global::set_tracer_provider(provider);
 
     global::tracer(args.tracer_name.clone()).in_span(args.span_name.clone(), |_| {
         print_span();
@@ -99,7 +126,10 @@ fn main() {
     });
 
     // Shutdown trace pipeline
-    global::shutdown_tracer_provider();
+    let _ = tokio::task::spawn_blocking(|| {
+        global::shutdown_tracer_provider();
+    })
+    .await;
 
     println!("Exiting");
 }

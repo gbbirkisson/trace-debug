@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.4.4", features = ["derive"] }
-opentelemetry = "0.20.0"
-opentelemetry-jaeger = "0.19.0"
+tokio = { version = "1.32.0", features = ["macros"] }
+opentelemetry = { version = "0.20.0", features = ["rt-tokio"] }
+opentelemetry-jaeger = { version = "0.19.0", features = ["rt-tokio"] }
+opentelemetry-otlp = { version = "0.13.0" }
 opentelemetry-stdout = { version = "0.1.0", features = ["trace"] }
