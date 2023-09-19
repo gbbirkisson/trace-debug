@@ -29,7 +29,7 @@ struct Args {
     #[clap(default_value = "127.0.0.1")]
     host: String,
 
-    /// Port to ship traces to [default: <depends on protocol>]
+    /// Port to ship traces to [default: <depends on exporter>]
     #[clap(long)]
     port: Option<u16>,
 

@@ -1,15 +1,26 @@
-<img align="right" height="128" src="https://raw.githubusercontent.com/open-telemetry/opentelemetry-rust/main/assets/logo-text.png">
+<img align="right" height="100" src="https://raw.githubusercontent.com/open-telemetry/opentelemetry-rust/main/assets/logo-text.png">
 
-<h1>Trace debug</h1>
+<h1>trace-debug</h1>
 
 This program was created to debug trace pipelines.
 
 <!-- vim-markdown-toc GFM -->
 
+* [Installing](#installing)
 * [Usage](#usage)
 * [Using with kubernetes](#using-with-kubernetes)
+* [Supported exporters](#supported-exporters)
 
 <!-- vim-markdown-toc -->
+
+## Installing
+
+> [!NOTE]
+> You'll need `cargo` and the rust compiler installed on your machine!
+
+```console
+$ cargo install --path .
+```
 
 ## Usage
 
@@ -20,7 +31,7 @@ Usage: trace-debug [OPTIONS]
 Options:
   -e, --exporter <EXPORTER>          What exporter to ship traces with [default: stdout] [possible values: stdout, jaeger]
       --host <HOST>                  Host to ship traces to [default: 127.0.0.1]
-      --port <PORT>                  Port to ship traces to [default: <depends on protocol>]
+      --port <PORT>                  Port to ship traces to [default: <depends on exporter>]
       --service-name <SERVICE_NAME>  Service name [default: trace-debug]
   -t, --tracer-name <TRACER_NAME>    Tracer name [default: trace-debug]
   -s, --span-name <SPAN_NAME>        Span name [default: debug-span]
@@ -31,7 +42,10 @@ Options:
 
 ## Using with kubernetes
 
-You can build and run this binary in a pod like so:
+> [!NOTE]
+> You'll need `docker` and `kubectl` installed and setup on your machine.
+
+You can build and run this `trace-debug` in a pod like so:
 
 ```console
 $ NS=myns POD=mypod CMD='-n 5 -e jaeger --host $$JAEGER_AGENT_HOST' make exec
@@ -57,3 +71,10 @@ Created span with traceid 9bf235ac7e86b64dae821a50b4947932 and spanid 2b55e7cda9
 Created span with traceid 9bf235ac7e86b64dae821a50b4947932 and spanid 6666c2897ea22e88
 Exiting
 ```
+
+## Supported exporters
+
+- [x] stdout
+- [x] jaeger
+- [ ] otlp
+- [ ] zipkin
