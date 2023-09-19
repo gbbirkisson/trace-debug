@@ -8,6 +8,7 @@ This program was created to debug trace pipelines.
 
 * [Installing](#installing)
 * [Usage](#usage)
+* [Using with kubernetes](#using-with-kubernetes)
 * [Supported exporters](#supported-exporters)
 
 <!-- vim-markdown-toc -->
@@ -28,7 +29,8 @@ $ trace-debug --help
 Usage: trace-debug [OPTIONS]
 
 Options:
-  -e, --exporter <EXPORTER>          Exporter type [default: stdout] [possible values: stdout, jaeger]
+  -e, --exporter <EXPORTER>          Exporter type [default: stdout] [possible values: stdout, jaeger, otlp]
+      --scheme <SCHEME>              Scheme to use [default: http]
       --host <HOST>                  Host to export to [default: 127.0.0.1]
       --port <PORT>                  Port to export to [default: <depends on exporter>]
       --service-name <SERVICE_NAME>  Service name [default: trace-debug]
@@ -36,7 +38,8 @@ Options:
   -s, --span-name <SPAN_NAME>        Span name [default: debug-span]
   -n, --number <NUMBER>              Number of generated child spans [default: 0]
   -h, --help                         Print help
-  -V, --version                      Print version```
+  -V, --version                      Print version
+```
 
 ## Using with kubernetes
 
