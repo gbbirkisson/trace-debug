@@ -17,19 +17,19 @@ enum Exporter {
 }
 
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
+#[command(author, version, about = None, long_about = None)]
 struct Args {
-    /// What exporter to ship traces with
+    /// Exporter type
     #[clap(short, long)]
     #[clap(value_enum, default_value_t=Exporter::Stdout)]
     exporter: Exporter,
 
-    /// Host to ship traces to
+    /// Host to export to
     #[clap(long)]
     #[clap(default_value = "127.0.0.1")]
     host: String,
 
-    /// Port to ship traces to [default: <depends on exporter>]
+    /// Port to export to [default: <depends on exporter>]
     #[clap(long)]
     port: Option<u16>,
 
@@ -48,7 +48,7 @@ struct Args {
     #[clap(default_value = "debug-span")]
     span_name: String,
 
-    /// Number of child spans to ship
+    /// Number of generated child spans
     #[clap(short, long)]
     #[clap(default_value = "0")]
     number: usize,

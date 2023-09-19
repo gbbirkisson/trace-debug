@@ -8,7 +8,6 @@ This program was created to debug trace pipelines.
 
 * [Installing](#installing)
 * [Usage](#usage)
-* [Using with kubernetes](#using-with-kubernetes)
 * [Supported exporters](#supported-exporters)
 
 <!-- vim-markdown-toc -->
@@ -19,7 +18,7 @@ This program was created to debug trace pipelines.
 > You'll need `cargo` and the rust compiler installed on your machine!
 
 ```console
-$ cargo install --path .
+$ cargo install --git https://github.com/gbbirkisson/trace-debug.git
 ```
 
 ## Usage
@@ -29,16 +28,15 @@ $ trace-debug --help
 Usage: trace-debug [OPTIONS]
 
 Options:
-  -e, --exporter <EXPORTER>          What exporter to ship traces with [default: stdout] [possible values: stdout, jaeger]
-      --host <HOST>                  Host to ship traces to [default: 127.0.0.1]
-      --port <PORT>                  Port to ship traces to [default: <depends on exporter>]
+  -e, --exporter <EXPORTER>          Exporter type [default: stdout] [possible values: stdout, jaeger]
+      --host <HOST>                  Host to export to [default: 127.0.0.1]
+      --port <PORT>                  Port to export to [default: <depends on exporter>]
       --service-name <SERVICE_NAME>  Service name [default: trace-debug]
   -t, --tracer-name <TRACER_NAME>    Tracer name [default: trace-debug]
   -s, --span-name <SPAN_NAME>        Span name [default: debug-span]
-  -n, --number <NUMBER>              Number of child spans to ship [default: 0]
+  -n, --number <NUMBER>              Number of generated child spans [default: 0]
   -h, --help                         Print help
-  -V, --version                      Print version
-```
+  -V, --version                      Print version```
 
 ## Using with kubernetes
 
